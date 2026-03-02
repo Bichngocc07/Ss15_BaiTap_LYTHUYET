@@ -3,9 +3,7 @@ import java.util.Stack;
 
 public class BaiTap3 {
 
-    // =====================================
-    // CLASS: MedicationProcessChecker
-    // =====================================
+
     static class MedicationProcessChecker {
 
         private Stack<String> stack = new Stack<>();
@@ -57,9 +55,6 @@ public class BaiTap3 {
         }
     }
 
-    // =====================================
-    // MAIN TEST
-    // =====================================
     public static void main(String[] args) {
 
         MedicationProcessChecker checker = new MedicationProcessChecker();
@@ -80,3 +75,4 @@ public class BaiTap3 {
         checker.checkProcess(process3);
     }
 }
+
