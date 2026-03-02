@@ -3,9 +3,7 @@ import java.util.Queue;
 
 public class BaiTap4 {
 
-    // =====================================
-    // CLASS: EmergencyPatient
-    // =====================================
+ 
     static class EmergencyPatient {
         private String id;
         private String name;
@@ -32,9 +30,6 @@ public class BaiTap4 {
         }
     }
 
-    // =====================================
-    // CLASS: EmergencyQueue
-    // =====================================
     static class EmergencyQueue {
 
         private Queue<EmergencyPatient> urgentQueue = new LinkedList<>();
@@ -92,9 +87,6 @@ public class BaiTap4 {
         }
     }
 
-    // =====================================
-    // MAIN TEST
-    // =====================================
     public static void main(String[] args) {
 
         EmergencyQueue eq = new EmergencyQueue();
@@ -113,4 +105,5 @@ public class BaiTap4 {
         eq.callNextPatient();
     }
 }
+
 
