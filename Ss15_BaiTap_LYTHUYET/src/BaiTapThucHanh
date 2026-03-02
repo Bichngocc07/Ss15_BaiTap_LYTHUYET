@@ -1,0 +1,227 @@
+import java.util.*;
+
+/* =========================
+   INTERFACE
+   ========================= */
+interface IManagement<T> {
+    void add(T t);
+    void display();
+    T search(String keyword);
+    void sort();
+}
+
+/* =========================
+   ABSTRACT PERSON
+   ========================= */
+abstract class Person {
+    protected String id;
+    protected String fullName;
+    protected int age;
+
+    public Person(String id, String fullName, int age) {
+        this.id = id;
+        this.fullName = fullName;
+        this.age = age;
+    }
+
+    public String getId() { return id; }
+    public String getFullName() { return fullName; }
+    public int getAge() { return age; }
+
+    public abstract void showInfo();
+}
+
+/* =========================
+   PATIENT
+   ========================= */
+class Patient extends Person {
+
+    protected String medicalCondition;
+    protected Stack<String> history = new Stack<>();
+
+    public Patient(String id, String fullName, int age, String medicalCondition) {
+        super(id, fullName, age);
+        this.medicalCondition = medicalCondition;
+    }
+
+    public void addHistory(String record) {
+        history.push(record);
+    }
+
+    public void showHistory() {
+        if (history.isEmpty()) {
+            System.out.println("Không có lịch sử điều trị.");
+            return;
+        }
+        System.out.println("Lịch sử điều trị (mới -> cũ):");
+        for (int i = history.size() - 1; i >= 0; i--)
+            System.out.println("- " + history.get(i));
+    }
+
+    @Override
+    public void showInfo() {
+        System.out.println(id + " | " + fullName + " | " + age + " tuổi | " + medicalCondition);
+    }
+}
+
+/* =========================
+   EMERGENCY PATIENT
+   ========================= */
+class EmergencyPatient extends Patient {
+
+    private int priorityLevel;
+
+    public EmergencyPatient(String id, String fullName, int age, String medicalCondition, int priorityLevel) {
+        super(id, fullName, age, medicalCondition);
+        this.priorityLevel = priorityLevel;
+    }
+
+    public int getPriorityLevel() { return priorityLevel; }
+
+    @Override
+    public void showInfo() {
+        System.out.println(id + " | " + fullName + " | " + age + " tuổi | " + medicalCondition + " | CẤP CỨU(" + priorityLevel + ")");
+    }
+}
+
+/* =========================
+   MANAGEMENT SYSTEM
+   ========================= */
+class HospitalManagement implements IManagement<Person> {
+
+    private Queue<Person> queue = new LinkedList<>();
+    private Scanner sc = new Scanner(System.in);
+
+    /* ADD PATIENT */
+    @Override
+    public void add(Person p) {
+        if (p instanceof EmergencyPatient)
+            ((LinkedList<Person>) queue).addFirst(p);
+        else
+            queue.add(p);
+    }
+
+    /* DISPLAY QUEUE */
+    @Override
+    public void display() {
+        if (queue.isEmpty()) {
+            System.out.println("Không có bệnh nhân đang chờ.");
+            return;
+        }
+        System.out.println("---- DANH SÁCH CHỜ ----");
+        for (Person p : queue)
+            p.showInfo();
+    }
+
+    /* SEARCH */
+    @Override
+    public Person search(String keyword) {
+        for (Person p : queue)
+            if (p.getId().equalsIgnoreCase(keyword) || p.getFullName().toLowerCase().contains(keyword.toLowerCase()))
+                return p;
+        return null;
+    }
+
+    /* SORT BY AGE */
+    @Override
+    public void sort() {
+        List<Person> list = new ArrayList<>(queue);
+        list.sort(Comparator.comparingInt(Person::getAge));
+        queue.clear();
+        queue.addAll(list);
+        System.out.println("Đã sắp xếp theo tuổi.");
+    }
+
+    /* CALL NEXT */
+    public void callPatient() {
+        if (queue.isEmpty()) {
+            System.out.println("Không có bệnh nhân!");
+            return;
+        }
+
+        Person p = queue.poll();
+        System.out.println("Đang khám:");
+        p.showInfo();
+
+        if (p instanceof Patient) {
+            System.out.print("Nhập chẩn đoán/thuốc: ");
+            String record = sc.nextLine();
+            ((Patient) p).addHistory(record);
+        }
+    }
+
+    /* VIEW HISTORY */
+    public void viewHistory(String id) {
+        for (Person p : queue) {
+            if (p.getId().equals(id) && p instanceof Patient) {
+                ((Patient) p).showHistory();
+                return;
+            }
+        }
+        System.out.println("Không tìm thấy bệnh nhân trong hàng chờ.");
+    }
+}
+
+/* =========================
+   MAIN MENU
+   ========================= */
+public class Main {
+
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        HospitalManagement hm = new HospitalManagement();
+
+        while (true) {
+            System.out.println("\n===== MENU =====");
+            System.out.println("1. Đăng ký khám");
+            System.out.println("2. Gọi khám");
+            System.out.println("3. Danh sách chờ");
+            System.out.println("4. Tìm bệnh nhân");
+            System.out.println("5. Sắp xếp theo tuổi");
+            System.out.println("0. Thoát");
+            System.out.print("Chọn: ");
+
+            int choice = Integer.parseInt(sc.nextLine());
+
+            switch (choice) {
+
+                case 1:
+                    System.out.print("ID: "); String id = sc.nextLine();
+                    System.out.print("Tên: "); String name = sc.nextLine();
+                    System.out.print("Tuổi: "); int age = Integer.parseInt(sc.nextLine());
+                    System.out.print("Bệnh: "); String condition = sc.nextLine();
+                    System.out.print("Cấp cứu? (y/n): "); String e = sc.nextLine();
+
+                    if (e.equalsIgnoreCase("y"))
+                        hm.add(new EmergencyPatient(id,name,age,condition,1));
+                    else
+                        hm.add(new Patient(id,name,age,condition));
+                    break;
+
+                case 2:
+                    hm.callPatient();
+                    break;
+
+                case 3:
+                    hm.display();
+                    break;
+
+                case 4:
+                    System.out.print("Nhập ID/Tên: ");
+                    Person p = hm.search(sc.nextLine());
+                    if (p != null) p.showInfo();
+                    else System.out.println("Không tìm thấy.");
+                    break;
+
+                case 5:
+                    hm.sort();
+                    break;
+
+                case 0:
+                    return;
+            }
+        }
+    }
+}
+```
